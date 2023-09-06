@@ -1,6 +1,5 @@
 import json
 import argparse
-import numpy as np
 
 
 # 入力された赤外線LEDの点灯・消灯時間を1周期の時間で割って、正規化する
