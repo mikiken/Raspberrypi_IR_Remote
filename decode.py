@@ -67,6 +67,14 @@ def parse_decoded_code(decoded_code):
     return frame
 
 
+def parse_decoded_code_as_hex(decoded_code):
+    hex_code = ""
+    while len(decoded_code) > 0:
+        hex_code += "{:02x}".format(int(decoded_code[7::-1], 2))
+        decoded_code = decoded_code[8:]
+    return hex_code
+
+
 def analyze_ir_signal(code) -> None:
     normalized_code = normalize(code)
     decoded_code = decode(normalized_code)[0]
