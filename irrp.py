@@ -6,6 +6,7 @@
 # 2020-12-08
 # Moduled by Cartelet
 # This code was referenced from https://qiita.com/Cartelet/items/1a451ec0abf5734aceae
+# Edited by mikiken to recieve a file object as argument
 
 """
 A utility to record and then playback IR remote control codes.
@@ -28,6 +29,7 @@ gap        gap in milliseconds between transmitted codes, default 100 ms
 import time
 import json
 import os
+from typing import IO
 
 import pigpio  # http://abyz.co.uk/rpi/pigpio/python.html
 
@@ -35,7 +37,7 @@ import pigpio  # http://abyz.co.uk/rpi/pigpio/python.html
 class IRRP:
     def __init__(
         self,
-        file: str,
+        file: str = "",
         freq: float = 38.0,
         gap: int = 100,
         glitch: int = 100,
@@ -48,7 +50,6 @@ class IRRP:
     ):
         self.GPIO = None
         self.FILE = file  # Filename
-
         self.FREQ = freq  # frequency kHz
 
         self.GAP_MS = gap  # key gap ms
@@ -312,27 +313,30 @@ class IRRP:
                 self._end_of_code()
 
     def Record(
-        self, GPIO: int, ID: list, file: str = "", pre: int = None, post: int = None
+        self, GPIO: int, ID: list, file: str = "", file_object: IO = None, pre: int = None, post: int = None
     ):
         self.pi = pigpio.pi()  # Connect to Pi.
 
         self.GPIO = GPIO
-        if file:
-            FILE = file
-        else:
-            FILE = self.FILE
         if pre:
             self.PRE_MS = pre
             self.PRE_US = self.PRE_MS * 1000
         if post:
             self.POST_MS = post
             self.POST_US = self.POST_MS * 1000
-        try:
-            f = open(self.FILE, "r")
-            records = json.load(f)
-            f.close()
-        except:
-            records = {}
+        if file_object:
+            records = json.load(file_object)
+        else :
+            if file:
+                FILE = file
+            else:
+                FILE = self.FILE
+            try:
+                f = open(self.FILE, "r")
+                records = json.load(f)
+                f.close()
+            except:
+                records = {}
 
         self.pi.set_mode(GPIO, pigpio.INPUT)  # IR RX connected to this GPIO.
 
@@ -387,25 +391,29 @@ class IRRP:
 
         self._tidy(records)
 
-        self._backup(FILE)
-
-        f = open(FILE, "w")
-        f.write(json.dumps(records, sort_keys=True).replace("],", "],\n") + "\n")
-        f.close()
+        if FILE:
+            self._backup(FILE)
+            
+            f = open(FILE, "w")
+            f.write(json.dumps(records, sort_keys=True).replace("],", "],\n") + "\n")
+            f.close()
         self.pi.stop()  # Disconnect from Pi.
 
-    def Playback(self, GPIO: int, ID: int, file: str = ""):  # Playback.
+    def Playback(self, GPIO: int, ID: int, file: str = "", file_object: IO = None):  # Playback.
         self.pi = pigpio.pi()  # Connect to Pi.
 
-        if file:
-            FILE = file
+        if file_object:
+            f = file_object
         else:
-            FILE = self.FILE
-        try:
-            f = open(FILE, "r")
-        except:
-            print("Can't open: {}".format(FILE))
-            exit(0)
+            if file:
+                FILE = file
+            else:
+                FILE = self.FILE
+            try:
+                f = open(FILE, "r")
+            except:
+                print("Can't open: {}".format(FILE))
+                exit(0)
 
         records = json.load(f)
 
