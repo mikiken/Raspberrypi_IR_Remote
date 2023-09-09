@@ -17,32 +17,30 @@ def encode_mitsubishi_aircon(
     data = "23cb260100"
 
     # byte 5 : power
-    match power:
-        case "on":
-            data += "20"
-        case "off":
-            data += "00"
-        case _:
-            raise (f"'{power}' is Invalid argument for 'power'.")
+    if power == "on":
+        data += "20"
+    elif power ==  "off":
+        data += "00"
+    else:
+        raise (f"'{power}' is Invalid argument for 'power'.")
 
     # byte 6 : mode
-    match mode:
-        case "ac_move_eye":
-            data += "58"
-        case "ac":
-            data += "18"
-        case "heat_move_eye":
-            data += "48"
-        case "heat":
-            data += "08"
-        case "dry_move_eye":
-            data += "50"
-        case "dry":
-            data += "10"
-        case "fan":
-            data += "38"
-        case _:
-            raise (f"'{mode}' is Invalid argument for 'mode'.")
+    if mode == "ac_move_eye":
+        data += "58"
+    elif mode == "ac":
+        data += "18"
+    elif mode == "heat_move_eye":
+        data += "48"
+    elif mode == "heat":
+        data += "08"
+    elif mode == "dry_move_eye":
+        data += "50"
+    elif mode == "dry":
+        data += "10"
+    elif mode == "fan":
+        data += "38"
+    else:
+        raise (f"'{mode}' is Invalid argument for 'mode'.")
 
     # byte 7 : temprature
     if 16 <= temp <= 31:
@@ -51,71 +49,66 @@ def encode_mitsubishi_aircon(
         raise (f"'{temp}' is Invalid argument for 'temp'.")
 
     # byte 8 (upper 4bit) : wind direction (horizontal)
-    match direction_h:
-        case "leftmost":
-            data += "1"
-        case "left":
-            data += "2"
-        case "center":
-            data += "3"
-        case "right":
-            data += "4"
-        case "rightmost":
-            data += "5"
-        case "swing":
-            data += "c"
-        case _:
-            raise (f"'{direction_h}' is Invalid argument for 'direction_h'.")
+    if direction_h == "leftmost":
+        data += "1"
+    elif direction_h == "left":
+        data += "2"
+    elif direction_h == "center":
+        data += "3"
+    elif direction_h == "right":
+        data += "4"
+    elif direction_h == "rightmost":
+        data += "5"
+    elif direction_h == "swing":
+        data += "c"
+    else:
+        raise (f"'{direction_h}' is Invalid argument for 'direction_h'.")
 
     # byte 8 (lower 4bit) : dry strength
-    match mode:
-        case "ac" | "ac_move_eye":
-            data += "6"
-        case "heat" | "heat_move_eye" | "fan":
+    if mode == "ac" or mode ==  "ac_move_eye":
+        data += "6"
+    elif mode == "heat" or mode == "heat_move_eye" or mode == "fan":
+        data += "0"
+    elif mode == "dry" or mode ==  "dry_move_eye":
+        if dry_strength == "high":
             data += "0"
-        case "dry" | "dry_move_eye":
-            match dry_strength:
-                case "high":
-                    data += "0"
-                case "middle":
-                    data += "2"
-                case "low":
-                    data += "4"
+        elif dry_strength == "middle":
+            data += "2"
+        elif dry_strength == "low":
+            data += "4"
 
     # byte 9 (upper 2bit) : beep (once : 0b01, twice: 0b10)
     byte9_bin = "01"
 
     # byte 9 (middle 3bit) : wind direction (vertical)
-    match direction_v:
-        case "auto":
-            byte9_bin += "000"
-        case "upmost":
-            byte9_bin += "001"
-        case "up":
-            byte9_bin += "010"
-        case "middle":
-            byte9_bin += "011"
-        case "down":
-            byte9_bin += "100"
-        case "downmost":
-            byte9_bin += "101"
-        case "swing":
-            byte9_bin += "111"
-        case _:
-            raise (f"'{direction_v}' is Invalid argument for 'direction_v'.")
+    if direction_v == "auto":
+        byte9_bin += "000"
+    elif direction_v == "upmost":
+        byte9_bin += "001"
+    elif direction_v == "up":
+        byte9_bin += "010"
+    elif direction_v == "middle":
+        byte9_bin += "011"
+    elif direction_v == "down":
+        byte9_bin += "100"
+    elif direction_v == "downmost":
+        byte9_bin += "101"
+    elif direction_v == "swing":
+        byte9_bin += "111"
+    else:
+        raise (f"'{direction_v}' is Invalid argument for 'direction_v'.")
 
     # byte 9 (lower 3bit) : wind strength
-    match strength:
-        case "auto":
-            byte9_bin += "000"
-        case "low":
-            byte9_bin += "001"
-        case "middle":
-            byte9_bin += "010"
-        case "high":
-            byte9_bin += "011"
-        case _:
-            raise (f"'{strength}' is Invalid argument for 'strength'.")
+    if strength == "auto":
+        byte9_bin += "000"
+    elif strength == "low":
+        byte9_bin += "001"
+    elif strength == "middle":
+        byte9_bin += "010"
+    elif strength == "high":
+        byte9_bin += "011"
+    else:
+        raise (f"'{strength}' is Invalid argument for 'strength'.")
 
     data += "{:02x}".format(int(byte9_bin, 2), "x")
 
@@ -123,15 +116,14 @@ def encode_mitsubishi_aircon(
     data += "000000"
 
     # byte 13 : wind area
-    match wind_area:
-        case "swing":
-            data += "00"
-        case "wide":
-            data += "80"
-        case "left":
-            data += "40"
-        case "right":
-            data += "c0"
+    if wind_area == "swing":
+        data += "00"
+    elif wind_area == "wide":
+        data += "80"
+    elif wind_area == "left":
+        data += "40"
+    elif wind_area == "right":
+        data += "c0"
 
     # byte 14 = 16 (fixed)
     data += "100000"
@@ -160,20 +152,19 @@ def encode_ir_signal(
     unit_time: int,
     repeat: int,
 ):
-    match format:
-        case "AEHA":
-            bin_data = encode_aeha_to_bin(encoded_hex)
-            unit_frame = [unit_time * 8, unit_time * 4]
-            for b in bin_data:
-                if b == "0":
-                    unit_frame.extend([unit_time, unit_time])
-                else:
-                    unit_frame.extend([unit_time, unit_time * 3])
-            frame = []
-            for i in range(repeat):
-                frame += unit_frame
-                frame += [unit_time, unit_time * 30]
-            return frame
+    if format == "AEHA":
+        bin_data = encode_aeha_to_bin(encoded_hex)
+        unit_frame = [unit_time * 8, unit_time * 4]
+        for b in bin_data:
+            if b == "0":
+                unit_frame.extend([unit_time, unit_time])
+            else:
+                unit_frame.extend([unit_time, unit_time * 3])
+        frame = []
+        for i in range(repeat):
+            frame += unit_frame
+            frame += [unit_time, unit_time * 30]
+        return frame
 
 
 def main() -> None:
