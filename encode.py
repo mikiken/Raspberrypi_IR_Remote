@@ -125,7 +125,7 @@ def encode_mitsubishi_aircon(
     elif wind_area == "right":
         data += "c0"
 
-    # byte 14 = 16 (fixed)
+    # byte 14 ~ 16 (fixed)
     data += "100000"
 
     # byte 17 : check sum (256 remainders of the sum of 0~16 bytes)
